@@ -5,8 +5,9 @@ import mongoose from "mongoose";
 import myUserRoute from "./routes/MyUserRoute";
 import { v2 as cloudinary } from "cloudinary";
  import myVpnRoute from "./routes/MyVpnRoute";
+ import vpnRoute from "./routes/VpnRoute"
 // import restaurantRoute from "./routes/RestaurantRoute";
-// import orderRoute from "./routes/OrderRoute";
+import orderRoute from "./routes/OrderRoute";
 
 mongoose
   .connect(process.env.MONGODB_CONNECTION_STRING as string)
@@ -22,7 +23,7 @@ const app = express();
 
 app.use(cors());
 
-// app.use("/api/order/checkout/webhook", express.raw({ type: "*/*" }));
+app.use("/api/order/checkout/webhook", express.raw({ type: "*/*" }));
 
 app.use(express.json());
 
@@ -32,6 +33,8 @@ app.get("/health", async (req: Request, res: Response) => {
 
 app.use("/api/my/user", myUserRoute);
 app.use("/api/my/vpn", myVpnRoute);
+app.use("/api/vpn", vpnRoute);
+app.use("/api/order", orderRoute);
 // app.use("/api/my/restaurant", myRestaurantRoute);
 // app.use("/api/restaurant", restaurantRoute);
 // app.use("/api/order", orderRoute);
