@@ -137,6 +137,7 @@ import { Request, Response } from "express";
 import Vpn from "../models/vpn";
 import cloudinary from "cloudinary";
 import mongoose from "mongoose";
+import Order from "../models/order";
 
 // Extend Express Request to include `user` from jwtParse middleware
 // interface AuthRequest extends Request {
@@ -234,6 +235,50 @@ const updateMyVpn = async (req: Request, res: Response) => {
   }
 };
 
+const getMyVpnOrders = async(req:Request, res: Response) => {
+  try{
+    const vpn = await Vpn.findOne({user: req.userId});
+    if(!vpn){
+      res.status(404).json({message: "vpn not found"});
+      return;
+    }
+
+    const orders = await Order.find({vpn: vpn._id}).populate("vpn").populate("user");
+    res.json(orders);
+
+  }catch(error){
+    console.log(error);
+    res.status(500).json({message: "something went wrong"});
+  }
+};
+
+const updateOrderStatus = async (req:Request, res:Response) => {
+  try{
+    const {orderId} = req.params;
+    const {status} = req.body;
+
+    const order = await Order.findById(orderId);
+    if(!order){
+      res.status(404).json({message: "order not found"});
+      return;
+    }
+    const vpn = await Vpn.findById(order.vpn);
+
+    if(vpn?.user?._id.toString() !== req.userId){
+      res.status(401).send();
+      return;
+    }
+    order.status = status;
+    await order.save();
+
+    res.status(200).json(order);
+
+  }catch(error){
+    console.log(error);
+    res.status(500).json({message: "unable to update order status"});
+  }
+};
+
 // ─────────────────────────────────────────────
 // Image Upload Helper
 // ─────────────────────────────────────────────
@@ -247,6 +292,8 @@ const uploadImage = async (file: Express.Multer.File) => {
 // ─────────────────────────────────────────────
 
 export default {
+  updateOrderStatus,
+  getMyVpnOrders,
   getMyVpn,
   createMyVpn,
   updateMyVpn,

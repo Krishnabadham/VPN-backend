@@ -41,11 +41,16 @@ const upload = multer({
 });
 
 // Base: /api/my/vpn
+router.patch("/order/:orderId/status", jwtCheck, jwtParse, requireAdmin,  MyVpnController.updateOrderStatus);
+
+router.get("/order", jwtCheck, jwtParse, requireAdmin, MyVpnController.getMyVpnOrders);
 
 // 🟢 Allow any authenticated user to fetch their VPN
 router.get("/", jwtCheck, jwtParse, MyVpnController.getMyVpn);
 
 // 🔒 Only admins can create/update VPNs
+
+
 router.post(
   "/",
   upload.single("imageFile"),
